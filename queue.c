@@ -69,14 +69,12 @@ bool q_insert_head(queue_t *q, char *s)
     if (q->head == NULL) {
         newh->next = NULL;
         q->head = newh;
+        q->tail = newh;
     } else {
         newh->next = q->head;
         q->head = newh;
     }
     q->size++;
-
-    if (q->tail == NULL)
-        q->tail = newh;
     return true;
 }
 
@@ -119,8 +117,6 @@ bool q_insert_tail(queue_t *q, char *s)
         q->tail = newt;
     }
     q->size++;
-
-
     return true;
 }
 
@@ -138,27 +134,19 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
         return false;
 
     if (bufsize != 0 && q->head->value != NULL && sp != NULL) {
-        if (strlen(q->head->value) > bufsize) {
+        if (strlen(q->head->value) + 1 > bufsize) {
             strncpy(sp, q->head->value, bufsize);
-            sp[bufsize - 1] = 0;
+            sp[bufsize - 1] = '\0';
         } else {
             strncpy(sp, q->head->value,
                     sizeof(char) * strlen(q->head->value) + 1);
         }
     }
     list_ele_t *tmp = q->head;
-
-    if (q->head->next == NULL) {
-        free(tmp->value);
-        free(tmp);
-        free(q);
-        q->size = 0;
-    } else {
-        q->head = q->head->next;
-        free(tmp->value);
-        free(tmp);
-        q->size--;
-    }
+    q->head = q->head->next;
+    free(tmp->value);
+    free(tmp);
+    q->size--;
     return true;
 }
 
@@ -184,16 +172,20 @@ void q_reverse(queue_t *q)
 {
     if (q == NULL || q->head == NULL)
         return;
-    q->tail = q->head;
-    list_ele_t *next = q->head->next;
-    list_ele_t *prev = NULL;
 
-    do {
-        q->head->next = prev;
-        prev = q->head;
-        q->head = next;
-    } while ((next = next->next) != NULL);
-    q->head->next = prev;
+    q->tail = q->head;
+    list_ele_t *prev, *cur, *next;
+    prev = NULL;
+    cur = q->head;
+    next = q->head->next;
+    while (next != NULL) {
+        cur->next = prev;
+        prev = cur;
+        cur = next;
+        next = next->next;
+    }
+    cur->next = prev;
+    q->head = cur;
 }
 
 /*
