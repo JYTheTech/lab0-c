@@ -15,21 +15,18 @@
 
 /* Linked list element (You shouldn't need to change this) */
 typedef struct ELE {
-    /* Pointer to array holding string.
-     * This array needs to be explicitly allocated and freed
-     */
     char *value;
     struct ELE *next;
 } list_ele_t;
 
-/* Queue structure */
+/*
+ * Queue structure.
+ * Header of the queue.
+ */
 typedef struct {
-    list_ele_t *head; /* Linked list of elements */
+    list_ele_t *head;
+    list_ele_t *tail;
     int size;
-    /* TODO: You will need to add more fields to this structure
-     *        to efficiently implement q_size and q_insert_tail.
-     */
-    /* TODO: Remove the above comment when you are about to implement. */
 } queue_t;
 
 /* Operations on queue */

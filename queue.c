@@ -12,15 +12,27 @@
 queue_t *q_new()
 {
     queue_t *q = malloc(sizeof(queue_t));
-    /* TODO: What if malloc returned NULL? */
+
+    if (q == NULL)
+        return NULL;
     q->head = NULL;
+    q->tail = NULL;
+    q->size = 0;
     return q;
 }
 
 /* Free all storage used by queue */
 void q_free(queue_t *q)
 {
-    /* TODO: How about freeing the list elements and the strings? */
+    if (q == NULL)
+        return;
+    /* Free elements of the queue */
+    while (q->head != NULL) {
+        list_ele_t *tmp = q->head;
+        q->head = q->head->next;
+        free(tmp->value);
+        free(tmp);
+    }
     /* Free queue structure */
     free(q);
 }
@@ -35,12 +47,36 @@ void q_free(queue_t *q)
 bool q_insert_head(queue_t *q, char *s)
 {
     list_ele_t *newh;
-    /* TODO: What should you do if the q is NULL? */
+
+    if (q == NULL)
+        return false;
     newh = malloc(sizeof(list_ele_t));
-    /* Don't forget to allocate space for the string and copy it */
-    /* What if either call to malloc returns NULL? */
-    newh->next = q->head;
-    q->head = newh;
+
+    if (newh == NULL) {
+        return false;
+    } else {
+        newh->value = malloc(sizeof(char) * strlen(s) + 1);
+    }
+
+    if (newh->value == NULL) {
+        free(newh);
+        return false;
+    } else {
+        memset(newh->value, 0, sizeof(char) * strlen(s) + 1);
+        strncpy(newh->value, s, sizeof(char) * strlen(s) + 1);
+    }
+
+    if (q->head == NULL) {
+        newh->next = NULL;
+        q->head = newh;
+    } else {
+        newh->next = q->head;
+        q->head = newh;
+    }
+    q->size++;
+
+    if (q->tail == NULL)
+        q->tail = newh;
     return true;
 }
 
@@ -53,10 +89,39 @@ bool q_insert_head(queue_t *q, char *s)
  */
 bool q_insert_tail(queue_t *q, char *s)
 {
-    /* TODO: You need to write the complete code for this function */
-    /* Remember: It should operate in O(1) time */
-    /* TODO: Remove the above comment when you are about to implement. */
-    return false;
+    list_ele_t *newt;
+
+    if (q == NULL)
+        return false;
+    newt = malloc(sizeof(list_ele_t));
+
+    if (newt == NULL) {
+        return false;
+    } else {
+        newt->value = malloc(sizeof(char) * strlen(s) + 1);
+    }
+
+    if (newt->value == NULL) {
+        free(newt);
+        return false;
+    } else {
+        memset(newt->value, 0, sizeof(char) * strlen(s) + 1);
+        strncpy(newt->value, s, sizeof(char) * strlen(s) + 1);
+    }
+
+    newt->next = NULL;
+
+    if (q->tail == NULL) {
+        q->tail = newt;
+        q->head = newt;
+    } else {
+        q->tail->next = newt;
+        q->tail = newt;
+    }
+    q->size++;
+
+
+    return true;
 }
 
 /*
@@ -69,9 +134,31 @@ bool q_insert_tail(queue_t *q, char *s)
  */
 bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
-    /* TODO: You need to fix up this code. */
-    /* TODO: Remove the above comment when you are about to implement. */
-    q->head = q->head->next;
+    if (q == NULL || q->head == NULL)
+        return false;
+
+    if (bufsize != 0 && q->head->value != NULL && sp != NULL) {
+        if (strlen(q->head->value) > bufsize) {
+            strncpy(sp, q->head->value, bufsize);
+            sp[bufsize - 1] = 0;
+        } else {
+            strncpy(sp, q->head->value,
+                    sizeof(char) * strlen(q->head->value) + 1);
+        }
+    }
+    list_ele_t *tmp = q->head;
+
+    if (q->head->next == NULL) {
+        free(tmp->value);
+        free(tmp);
+        free(q);
+        q->size = 0;
+    } else {
+        q->head = q->head->next;
+        free(tmp->value);
+        free(tmp);
+        q->size--;
+    }
     return true;
 }
 
@@ -81,6 +168,8 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
  */
 int q_size(queue_t *q)
 {
+    if (q == NULL || q->head == NULL)
+        return 0;
     return q->size;
 }
 
@@ -93,8 +182,18 @@ int q_size(queue_t *q)
  */
 void q_reverse(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
+    if (q == NULL || q->head == NULL)
+        return;
+    q->tail = q->head;
+    list_ele_t *next = q->head->next;
+    list_ele_t *prev = NULL;
+
+    do {
+        q->head->next = prev;
+        prev = q->head;
+        q->head = next;
+    } while ((next = next->next) != NULL);
+    q->head->next = prev;
 }
 
 /*
@@ -102,8 +201,4 @@ void q_reverse(queue_t *q)
  * No effect if q is NULL or empty. In addition, if q has only one
  * element, do nothing.
  */
-void q_sort(queue_t *q)
-{
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
-}
+void q_sort(queue_t *q) {}
