@@ -1,5 +1,6 @@
 #include "sort.h"
 #include <string.h>
+#include <strnatcmp.h>
 #include "queue.h"
 
 /*
@@ -34,7 +35,7 @@ list_ele_t *merge(list_ele_t *first_half, list_ele_t *second_half)
     list_ele_t *start, *current;
 
     if (first_half != NULL && second_half != NULL) {
-        if (strcmp(first_half->value, second_half->value) >= 0) {
+        if (strnatcasecmp(first_half->value, second_half->value) >= 0) {
             start = second_half;
             second_half = second_half->next;
         } else {
@@ -53,7 +54,7 @@ list_ele_t *merge(list_ele_t *first_half, list_ele_t *second_half)
     current = start;
 
     while (first_half != NULL && second_half != NULL) {
-        if (strcmp(first_half->value, second_half->value) >= 0) {
+        if (strnatcasecmp(first_half->value, second_half->value) >= 0) {
             current->next = second_half;
             second_half = second_half->next;
         } else {
